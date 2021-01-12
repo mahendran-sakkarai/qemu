@@ -100,7 +100,7 @@ int win_chr_serial_init(Chardev *chr, const char *filename, Error **errp)
     }
 
     if (!SetupComm(s->file, NRECVBUF, NSENDBUF)) {
-        error_setg(errp, "Failed SetupComm");
+        error_setg(errp, "Failed SetupComm (%lu)", GetLastError());
         goto fail;
     }
 
@@ -111,23 +111,23 @@ int win_chr_serial_init(Chardev *chr, const char *filename, Error **errp)
     CommConfigDialog(filename, NULL, &comcfg);
 
     if (!SetCommState(s->file, &comcfg.dcb)) {
-        error_setg(errp, "Failed SetCommState");
+        error_setg(errp, "Failed SetCommState (%lu)", GetLastError());
         goto fail;
     }
 
     if (!SetCommMask(s->file, EV_ERR)) {
-        error_setg(errp, "Failed SetCommMask");
+        error_setg(errp, "Failed SetCommMask (%lu)", GetLastError());
         goto fail;
     }
 
     cto.ReadIntervalTimeout = MAXDWORD;
     if (!SetCommTimeouts(s->file, &cto)) {
-        error_setg(errp, "Failed SetCommTimeouts");
+        error_setg(errp, "Failed SetCommTimeouts (%lu)", GetLastError());
         goto fail;
     }
 
     if (!ClearCommError(s->file, &err, &comstat)) {
-        error_setg(errp, "Failed ClearCommError");
+        error_setg(errp, "Failed ClearCommError (%lu)", GetLastError());
         goto fail;
     }
     qemu_add_polling_cb(win_chr_serial_poll, chr);
